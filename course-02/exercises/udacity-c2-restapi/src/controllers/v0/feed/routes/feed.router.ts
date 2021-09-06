@@ -23,8 +23,28 @@ router.get('/', async (req: Request, res: Response) => {
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
-        //@TODO try it yourself
-        res.send(500).send("not implemented")
+        let  {id }  = req.params;
+        let{ caption, url } =req.body;
+
+        if (isNaN(Number(id))){
+            return res.status(400).send(`Numeric ID is required`);
+          }
+        
+        const item= await FeedItem.findByPk(id);
+        if (item === null){
+            return res.status(404).send(`This ID is not found`);
+          }
+        if (!caption) {
+            return res.status(400).send({ message: 'Caption is required or malformed' });
+        }
+        // check Filename is valid
+        if (!url) {
+            return res.status(400).send({ message: 'File url is required' });
+        }
+        item.caption=caption;
+        item.url=url; 
+        item.save();
+        res.send(item);
 });
 
 
@@ -59,7 +79,7 @@ router.post('/',
     const item = await new FeedItem({
             caption: caption,
             url: fileName
-    });
+    }); 
 
     const saved_item = await item.save();
 
