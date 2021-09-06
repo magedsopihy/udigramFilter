@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { read } from 'jimp/*';
 
 (async () => {
 
@@ -31,6 +32,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   //! END @TODO1
   
+  app.get("/filteredimage/", async (req , res) => {
+    let { image_url } = req.query;
+    if(!image_url){
+      res.send('Image url not Found')
+    }
+    const filteredImage = await filterImageFromURL(image_url)
+
+    if(!filteredImage){
+      res.status(500).send('Something went wrong');
+    }
+    res.sendFile(filteredImage,()=> {
+      deleteLocalFiles([filteredImage])
+    });
+   
+    
+  })
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
